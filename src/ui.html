@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 16px;
+            margin: 0;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #18a0fb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .issue {
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .issue:hover {
+            background: #f9f9f9;
+        }
+
+        .name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .tag {
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Component Health Checker</h2>
+    <button onclick="runCheck()">Run Check</button>
+    <div id="results"></div>
+
+    <script>
+        function runCheck() {
+            parent.postMessage({ pluginMessage: { type: 'run-check' } }, '*')
+        }
+
+        window.onmessage = (event) => {
+            const msg = event.data.pluginMessage
+            if (!msg || msg.type !== 'results') return
+
+            const container = document.getElementById('results')
+            const issues = msg.data.filter(r => r.detached || r.isLocal || r.hasOverrides)
+
+            if (issues.length === 0) {
+                container.innerHTML = '<p style="color:green">✓ No issues found</p>'
+                return
+            }
+
+            container.innerHTML = issues.map(r => `
+        <div class="issue" onclick="selectNode('${r.id}')">
+          <div class="name">${r.name}</div>
+          ${r.detached ? '<div class="tag" style="color:#f00">⚠ Detached instance</div>' : ''}
+          ${r.isLocal ? '<div class="tag" style="color:#f90">⚠ Using local component (not from library)</div>' : ''}
+          ${r.hasOverrides ? '<div class="tag" style="color:#999">○ Has overrides</div>' : ''}
+        </div>
+      `).join('')
+        }
+
+        function selectNode(id) {
+            parent.postMessage({ pluginMessage: { type: 'select-node', id } }, '*')
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es6"],
+    "types": ["@figma/plugin-typings"],
+    "strict": false,
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/main.ts"]
+}

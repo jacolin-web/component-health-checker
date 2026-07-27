@@ -1,0 +1,253 @@
+[
+  {
+    "id": "1:100",
+    "name": "corpus/healthy/Button-remote-1",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [],
+    "kind": "instance"
+  },
+  {
+    "id": "1:101",
+    "name": "corpus/healthy/Button-remote-2",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [],
+    "kind": "instance"
+  },
+  {
+    "id": "1:110",
+    "name": "corpus/text-override/Button-label-edited-1",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [
+      "characters"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:111",
+    "name": "corpus/text-override/Button-label-edited-2",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [
+      "characters",
+      "name"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:112",
+    "name": "corpus/text-override/Alert-copy-edited",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Alert/Info",
+      "remote": true
+    },
+    "overriddenFields": [
+      "characters",
+      "componentProperties"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:120",
+    "name": "corpus/style-override/Button-hardcoded-fill",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [
+      "fills"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:121",
+    "name": "corpus/style-override/Card-detached-text-style",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Card/Default",
+      "remote": true
+    },
+    "overriddenFields": [
+      "characters",
+      "textStyleId",
+      "fontSize"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:130",
+    "name": "corpus/local/Badge-defined-in-file",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Badge/New",
+      "remote": false
+    },
+    "overriddenFields": [],
+    "kind": "instance"
+  },
+  {
+    "id": "1:131",
+    "name": "corpus/local/Badge-local-with-drift",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Badge/New",
+      "remote": false
+    },
+    "overriddenFields": [
+      "fills",
+      "characters"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:140",
+    "name": "corpus/dangling/Chip-source-deleted",
+    "visible": true,
+    "nestedInInstance": false,
+    "mainComponent": null,
+    "overriddenFields": [
+      "fills",
+      "characters"
+    ],
+    "kind": "instance"
+  },
+  {
+    "id": "1:150",
+    "name": "corpus/hidden/Button-invisible-offender",
+    "visible": false,
+    "nestedInInstance": false,
+    "mainComponent": {
+      "name": "Button/Primary",
+      "remote": true
+    },
+    "overriddenFields": [
+      "strokes"
+    ],
+    "kind": "instance"
+  },
+  {
+    "kind": "styleable",
+    "id": "2:200",
+    "name": "corpus/unbound/Frame-raw-hex",
+    "nodeType": "FRAME",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "SOLID"
+      ],
+      "styleBound": false,
+      "variableBound": false
+    },
+    "text": null
+  },
+  {
+    "kind": "styleable",
+    "id": "2:201",
+    "name": "corpus/bound/Frame-token-fill",
+    "nodeType": "FRAME",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "SOLID"
+      ],
+      "styleBound": true,
+      "variableBound": false
+    },
+    "text": null
+  },
+  {
+    "kind": "styleable",
+    "id": "2:202",
+    "name": "corpus/bound/Rect-variable-fill",
+    "nodeType": "RECTANGLE",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "SOLID"
+      ],
+      "styleBound": false,
+      "variableBound": true
+    },
+    "text": null
+  },
+  {
+    "kind": "styleable",
+    "id": "2:210",
+    "name": "corpus/unbound/Text-no-style",
+    "nodeType": "TEXT",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "SOLID"
+      ],
+      "styleBound": true,
+      "variableBound": false
+    },
+    "text": {
+      "styleId": ""
+    }
+  },
+  {
+    "kind": "styleable",
+    "id": "2:211",
+    "name": "corpus/mixed/Text-mixed-segments",
+    "nodeType": "TEXT",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "SOLID"
+      ],
+      "styleBound": true,
+      "variableBound": false
+    },
+    "text": {
+      "styleId": "MIXED"
+    }
+  },
+  {
+    "kind": "styleable",
+    "id": "2:220",
+    "name": "corpus/content/Frame-image-fill",
+    "nodeType": "FRAME",
+    "visible": true,
+    "nestedInInstance": false,
+    "fill": {
+      "paintTypes": [
+        "IMAGE"
+      ],
+      "styleBound": false,
+      "variableBound": false
+    },
+    "text": null
+  }
+]

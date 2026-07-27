@@ -1,0 +1,189 @@
+<!-- ============================================================================
+  ui.html — Component Health Checker panel.
+  Speaks the four-message contract: sends run-check / select-node /
+  export-snapshots (dev); receives scan-started / results / scan-error /
+  snapshots-export. Vanilla by design: one panel, four messages — a framework
+  would be ceremony (see DECISIONS.md).
+============================================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root{
+    --bg:#ffffff; --text:#1e1e1e; --muted:#6f6f6f; --border:#e6e6e6;
+    --hover:#f5f5f5; --accent:#0d99ff;
+    --error:#dc3412; --error-bg:#fdecea;
+    --warn:#a86500; --warn-bg:#fff4e0;
+    --info:#0d67a8; --info-bg:#e9f3fc;
+    --pass:#1b7f43; --pass-bg:#e7f5ec;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font:11px/1.5 Inter,-apple-system,system-ui,sans-serif;color:var(--text);background:var(--bg);padding:12px;}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:2px;}
+
+  .run{display:block;width:100%;padding:8px 0;background:var(--accent);color:#fff;border-radius:6px;font-weight:600;font-size:12px;}
+  .run[disabled]{opacity:.55;cursor:default;}
+
+  #status{margin:10px 0 0;color:var(--muted);min-height:16px;}
+  #status.error{color:var(--error);}
+
+  #summary{display:none;margin:10px 0 4px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-weight:600;}
+  #summary .counts{font-weight:400;color:var(--muted);margin-top:2px;}
+  #summary.healthy{background:var(--pass-bg);border-color:var(--pass);color:var(--pass);}
+
+  .group{margin-top:10px;}
+  .group-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .sev{font-size:9px;font-weight:700;letter-spacing:.05em;padding:1px 5px;border-radius:3px;text-transform:uppercase;}
+  .sev.error{color:var(--error);background:var(--error-bg);}
+  .sev.warn{color:var(--warn);background:var(--warn-bg);}
+  .sev.info{color:var(--info);background:var(--info-bg);}
+  .group-head .rule{font-weight:600;}
+  .group-head .n{color:var(--muted);}
+
+  .rows{border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+  .row{display:block;width:100%;text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);}
+  .row:last-child{border-bottom:none;}
+  .row:hover,.row:focus-visible{background:var(--hover);}
+  .row .name{font-weight:600;}
+  .row .detail{color:var(--muted);display:block;margin-top:1px;}
+
+  details.dev{margin-top:14px;border-top:1px dashed var(--border);padding-top:8px;color:var(--muted);}
+  details.dev summary{cursor:pointer;font-size:10px;}
+  details.dev button{margin:6px 0;padding:4px 8px;border:1px solid var(--border);border-radius:4px;}
+  #snapshot-out{width:100%;height:110px;font:10px monospace;margin-top:4px;border:1px solid var(--border);border-radius:4px;padding:4px;}
+</style>
+</head>
+<body>
+
+<button class="run" id="run">Run Check</button>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="summary"></div>
+<div id="results"></div>
+
+<!-- DEV ONLY — delete this block and set DEV=false in main.ts before publish -->
+<details class="dev">
+  <summary>Dev: fixture export</summary>
+  <button id="export">Export snapshots</button>
+  <textarea id="snapshot-out" readonly aria-label="Serialized snapshots JSON"></textarea>
+</details>
+
+<script>
+  const $ = (id) => document.getElementById(id)
+  const post = (msg) => parent.postMessage({ pluginMessage: msg }, '*')
+
+  const SEVERITY_ORDER = { error: 0, warn: 1, info: 2 }
+  const RULE_LABELS = {
+    'dangling-main-component': 'Dangling main component',
+    'local-component': 'Local component',
+    'style-override-drift': 'Style override drift',
+    'unbound-fill': 'Unbound fill',
+    'unbound-text-style': 'Unbound text style',
+  }
+
+  $('run').addEventListener('click', () => post({ type: 'run-check' }))
+  $('export').addEventListener('click', () => post({ type: 'export-snapshots' }))
+
+  function renderResults(findings, summary) {
+    const summaryEl = $('summary')
+    const resultsEl = $('results')
+    resultsEl.textContent = ''
+    summaryEl.style.display = 'block'
+
+    if (findings.length === 0) {
+      summaryEl.className = 'healthy'
+      summaryEl.textContent = `All clear — ${summary.scanned} nodes scanned, 0 findings.`
+      return
+    }
+
+    summaryEl.className = ''
+    summaryEl.innerHTML = ''
+    const line = document.createElement('div')
+    line.textContent = `${summary.scanned} nodes scanned · ${summary.findingCount} findings`
+    const counts = document.createElement('div')
+    counts.className = 'counts'
+    counts.textContent = Object.entries(summary.byRule)
+      .map(([rule, n]) => `${RULE_LABELS[rule] || rule}: ${n}`)
+      .join(' · ')
+    summaryEl.append(line, counts)
+
+    // Group findings by rule, groups ordered by severity then count.
+    const groups = new Map()
+    for (const f of findings) {
+      if (!groups.has(f.ruleId)) groups.set(f.ruleId, { severity: f.severity, items: [] })
+      groups.get(f.ruleId).items.push(f)
+    }
+    const ordered = [...groups.entries()].sort(
+      (a, b) =>
+        SEVERITY_ORDER[a[1].severity] - SEVERITY_ORDER[b[1].severity] ||
+        b[1].items.length - a[1].items.length
+    )
+
+    for (const [ruleId, group] of ordered) {
+      const wrap = document.createElement('div')
+      wrap.className = 'group'
+
+      const head = document.createElement('div')
+      head.className = 'group-head'
+      const sev = document.createElement('span')
+      sev.className = `sev ${group.severity}`
+      sev.textContent = group.severity
+      const rule = document.createElement('span')
+      rule.className = 'rule'
+      rule.textContent = RULE_LABELS[ruleId] || ruleId
+      const n = document.createElement('span')
+      n.className = 'n'
+      n.textContent = `(${group.items.length})`
+      head.append(sev, rule, n)
+
+      const rows = document.createElement('div')
+      rows.className = 'rows'
+      for (const f of group.items) {
+        // <button> rows: native focus order + Enter/Space activation = NFR-4.
+        const row = document.createElement('button')
+        row.className = 'row'
+        row.setAttribute('aria-label', `Select ${f.nodeName} on canvas. ${f.detail}`)
+        const name = document.createElement('span')
+        name.className = 'name'
+        name.textContent = f.nodeName
+        const detail = document.createElement('span')
+        detail.className = 'detail'
+        detail.textContent = f.detail
+        row.append(name, detail)
+        row.addEventListener('click', () => post({ type: 'select-node', id: f.nodeId }))
+        rows.append(row)
+      }
+      wrap.append(head, rows)
+      resultsEl.append(wrap)
+    }
+  }
+
+  onmessage = (event) => {
+    const msg = event.data.pluginMessage
+    if (!msg) return
+    const status = $('status')
+    switch (msg.type) {
+      case 'scan-started':
+        status.className = ''
+        status.textContent = 'Scanning…'
+        $('run').disabled = true
+        break
+      case 'results':
+        status.textContent = ''
+        $('run').disabled = false
+        renderResults(msg.findings, msg.summary)
+        break
+      case 'scan-error':
+        status.className = 'error'
+        status.textContent = `Scan failed: ${msg.message}`
+        $('run').disabled = false
+        break
+      case 'snapshots-export':
+        $('snapshot-out').value = msg.json
+        break
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,11 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6"],
-    "types": ["@figma/plugin-typings"],
-    "strict": false,
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "target": "ES2017",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": [
+      "ES2017"
+    ],
+    "types": [
+      "@figma/plugin-typings"
+    ]
   },
-  "include": ["src/main.ts"]
+  "include": [
+    "src",
+    "tests"
+  ]
 }
